@@ -1,0 +1,8 @@
+aside{
+    width: 20vw;
+    height: 100vh;
+    float: left;
+    overflow: scroll;
+    overflow-x: hidden;
+    background-color: #f5f5f5;
+}
