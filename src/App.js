@@ -1,14 +1,12 @@
-import React from 'react';
+import React, { Component } from 'react';
+import './App.css';
 import {
   MapContainer,
   TileLayer,
   Marker,
-  Popup,
-  useMapEvents
+  Popup
 } from "react-leaflet";
-import { useState } from 'react';
-import Papa from "papaparse";
-import './App.css';
+
 import "leaflet/dist/leaflet.css";
 
 /**
@@ -23,63 +21,52 @@ L.Icon.Default.mergeOptions({
 });
 
 
+class App extends Component {
+  state = { markers: [] };
 
-export default function App() {
-  const center = [-5.2392367149948615, -38.130914436927064];
+  componentDidMount() {
+    fetch("http://localhost:3000/")
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+        this.setState({ markers: response });
+      });
+  }
 
-  return (
-    <div>
-      <h1>Escolha um arquivo .CSV</h1>
-      <input type="file" name="file" accept=".csv" onChange={loadCsv} />
-      <MapContainer
-        center={center}
-        zoom={10}
-        style={{ width: "100vw", height: "80vh" }}
-        scrollWheelZoom={false}
-      >
-        <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-<LocationMarker/>
-        <Marker position={center}>
-          <Popup>
-            Casa
-          </Popup>
-        </Marker>
-        
-      </MapContainer>
-    </div>
-  );
+  render() {
+    const center = [-5.2392367149948615, -38.130914436927064];
+
+    return (
+      <div>
+        <aside>
+          teste
+        </aside>
+        <MapContainer
+          center={center}
+          zoom={10}
+          style={{ width: "100vw", height: "100vh" }}
+          scrollWheelZoom={true}>
+          <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {/* {console.log(this.state.markers)} */}
+
+
+          {this.state.markers.length > 0 &&
+         this.state.markers.map((marker) => (
+           <Marker
+             position={[
+               marker["LAT"],
+               marker["LONG"]
+             ]}
+           >
+             <Popup>{marker["NM_FANTAS"]}</Popup>
+           </Marker>
+         ))}
+
+
+        </MapContainer>
+      </div>
+    );
+  }
 }
 
-function LocationMarker() {
-  const [position, setPosition] = useState(null)
-  const map = useMapEvents({
-    click() {
-      map.locate()
-    },
-    locationfound(e) {
-      setPosition(e.latlng)
-      map.flyTo(e.latlng, map.getZoom())
-    },
-  })
-
-  return position === null ? null : (
-    <Marker position={position}>
-      <Popup>You are here</Popup>
-    </Marker>
-  )
-}
-
-const loadCsv = (event) => {
-  // Passing file data (event.target.files[0]) to parse using Papa.parse
-  Papa.parse(event.target.files[0], {
-    header: true,
-    skipEmptyLines: true,
-    complete: function (results) {
-      results.data.map((d)=>{
-        console.log(Object.values(d))
-        
-      })
-    },
-  });
-};
+export default App;
