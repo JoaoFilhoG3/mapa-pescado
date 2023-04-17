@@ -1,0 +1,28 @@
+#title {
+    border-style: solid;
+    border-width: 1px;
+    padding: 10px;
+    border-color: #999999;
+    background-color: #1a237e;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    width: 100%;
+}
+
+#recurso {
+    border-style: none solid solid solid;
+    border-width: 1px;
+    padding: 10px 50px;
+    font-size: 12px;
+    color: white;
+}
+
+#recurso:nth-child(odd) {
+    background-color: #5c6bc0;
+}
+
+#recurso:nth-child(even) {
+    background-color: #7986cb;
+}

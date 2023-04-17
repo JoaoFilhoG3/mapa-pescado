@@ -3,9 +3,9 @@ import './App.css';
 import {
   MapContainer,
   TileLayer,
-  Marker,
-  Popup
+  Marker
 } from "react-leaflet";
+import TipoRecursoCollaps from './components/TipoRecursoCollaps/TipoRecursoCollaps.js';
 
 import "leaflet/dist/leaflet.css";
 
@@ -13,7 +13,8 @@ import "leaflet/dist/leaflet.css";
  * Código necessário para concertar BUG do Marker Icon
  */
 import L from "leaflet";
-import ListItem from './components/ListItem';
+import ListItem from './components/ListItem/ListItem';
+import MarkerPopup from './components/MarkerPopup/MarkerPopup';
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -23,14 +24,22 @@ L.Icon.Default.mergeOptions({
 
 
 class App extends Component {
-  state = { markers: [] };
+  state = {
+    recursos: [],
+    tipos_recursos: []
+  };
 
   componentDidMount() {
-    fetch("http://localhost:3000/")
+    fetch("http://localhost:3000/recursos")
       .then((response) => response.json())
       .then((response) => {
-        console.log(response);
-        this.setState({ markers: response });
+        this.setState({ recursos: response });
+      });
+
+    fetch("http://localhost:3000/tipo_recursos")
+      .then((response) => response.json())
+      .then((response) => {
+        this.setState({ tipos_recursos: response });
       });
   }
 
@@ -43,13 +52,23 @@ class App extends Component {
          * Painel Lateral com as camadas
          */}
         <aside>
-          {this.state.markers.length > 0 &&
-            this.state.markers.map((marker) => (
-              <ListItem
-                fantasia={marker["NM_FANTAS"]}
-                tipo={marker["TIPO_RECURSO"]}
-              />
-            ))}
+          <div id='logo-containter'>
+            <img id="logo" src='https://ipsum.co.uk/wp-content/uploads/2021/02/01.-Ipsum-Logo-Chevron-Blue.png' width={300} />
+          </div>
+          {this.state.tipos_recursos.length > 0 && this.state.tipos_recursos.map((tipo) => (
+            <TipoRecursoCollaps title={tipo["DESCRICAO"]}
+              recursos={this.state.recursos.length > 0 && this.state.recursos.filter((rec) => (
+                rec["TIPO_RECURSO"]["ID"] === tipo["ID"]
+              ))} />
+          ))}
+
+
+          {/* {this.state.recursos.length > 0 && this.state.recursos.map((marker) => (
+            <ListItem key={marker["ID"]}
+              fantasia={marker["NM_FANTAS"]}
+              tipo={marker["TIPO_RECURSO"]}
+            />
+          ))} */}
         </aside>
         {/**
          * Mapa em si
@@ -57,21 +76,26 @@ class App extends Component {
         <MapContainer
           center={center}
           zoom={10}
-          style={{ width: "80vw", height: "100vh" }}
+          style={{ width: "75vw", height: "100vh" }}
           scrollWheelZoom={true}>
           <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {/* {console.log(this.state.markers)} */}
+          {/* {console.log(this.state.recursos)} */}
 
 
-          {this.state.markers.length > 0 &&
-            this.state.markers.map((marker) => (
-              <Marker
+          {this.state.recursos.length > 0 &&
+            this.state.recursos.map((marker) => (
+              <Marker key={marker["ID"]}
                 position={[
                   marker["LAT"],
                   marker["LONG"]
                 ]}
               >
-                <Popup>{marker["NM_FANTAS"]}</Popup>
+                <MarkerPopup
+                  nomeFantasia={marker["NM_FANTAS"]}
+                  cnpj={marker["CNPJ"]}
+                  ddd={marker["DDD"]}
+                  telefone={marker["TELEFONE"]}
+                />
               </Marker>
             ))}
 
